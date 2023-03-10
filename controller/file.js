@@ -66,7 +66,7 @@ const getTextRact = async (url, callback) => {
     const response = await axios.post('http://132.148.74.110:443/text-ract', {
         url
     })
-    return callback(response.error, response.text)
+    return callback(response?.data?.error, response?.data?.text)
 }
 
 module.exports.textRact = (req, res) => {
