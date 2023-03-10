@@ -2,6 +2,7 @@ const { File, Information } = require('../model')
 const textract = require('textract');
 const { getEmbeddings, getEmbeddingContext, createCompletion } = require('../utils/openai');
 const { getBasenameFormUrl } = require('../utils');
+const { default: axios } = require('axios');
 
 module.exports.getFileList = (req, res) => {
     File.findAll().then(files => {
@@ -28,7 +29,8 @@ module.exports.uploadFile = (req, res) => {
         return res.status(401).json({ error: "Url is invalid" });
     }
 
-    textract.fromUrl(url, (error, text) => {
+    getTextRact(url, (error, text) => {
+        console.log(error, text)
         if (error) {
             console.log(error)
             return res.status(401).json({ error: "Url is invalid!", });
@@ -56,6 +58,29 @@ module.exports.uploadFile = (req, res) => {
                 return res.status(200).json({ message: "File is uploaded successfully!", files, });
             })
         })
+    })
+    // Check if the user exists in the database
+};
+
+const getTextRact = async (url, callback) => {
+    const response = await axios.post('http://132.148.74.110:443/text-ract', {
+        url
+    })
+    return callback(response.error, response.text)
+}
+
+module.exports.textRact = (req, res) => {
+    const { url } = req.body;
+    if (!url) {
+        return res.status(401).json({ error: "Url is invalid" });
+    }
+
+    textract.fromUrl(url, (error, text) => {
+        if (error) {
+            console.log(error)
+            return res.status(401).json({ error: "Url is invalid!", });
+        }
+        return res.status(200).json({ text, });
     })
     // Check if the user exists in the database
 };
